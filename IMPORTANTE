@@ -1,0 +1,102 @@
+# 📦 PRONT DE RESPALDO - DULSAN CAFETERÍA
+=========================================
+
+## 📱 DATOS DEL PROYECTO
+- Nombre: Dulsan Cafetería
+- Repositorio GitHub: https://github.com/alphaweb2008/DULSAN-PANADERIA-Y-PATELERIA/tree/main/DULSAN%20PANADERIA%20Y%20PASTELERIA
+
+## 🔧 STACK TECNOLÓGICO
+- Frontend: React 18 + Vite + TypeScript
+- Estilos: Tailwind CSS
+- Backend: Firebase (Firestore)
+- PWA: Service Worker + Manifest dinámico
+- Colores: Rosa grisáceo (#a87880), Celeste grisáceo (#5a949f)
+
+## 🔥 CREDENCIALES FIREBASE
+- API Key: AIzaSyB5jWNhyeHPL-3NFjJ6o5FSa12NtZ_aJkc
+- Project ID: dulsan-menu-principal
+- Auth Domain: dulsan-menu-principal.firebaseapp.com
+
+## 📁 ESTRUCTURA DE ARCHIVOS
+src/
+├── App.tsx              # App principal (todo integrado)
+├── main.tsx             # Entry point + Service Worker
+├── index.css            # Estilos globales + Fuentes
+├── data/
+│   └── defaultData.ts   # 12 categorías, 52 productos
+├── hooks/
+│   └── useLocalData.ts  # Hook Firebase + localStorage
+└── types/
+    └── index.ts         # Tipos TypeScript
+
+## 📊 CATEGORÍAS (12)
+1. ☀️ Desayunos (6 productos)
+2. ⚡ Para recargar energía (6 productos)
+3. 🍏 Zona Saludable (4 productos)
+4. 🍬 Para los más golosos (5 productos)
+5. 🧊 Bebidas Frías (4 productos)
+6. ☕ Bebidas Calientes (3 productos)
+7. 🌀 Cafés Fríos (3 productos)
+8. 🫖 Cafés Calientes (5 productos)
+9. 🥤 Bebidas Adicionales (5 productos)
+10. 👑 Especial (3 productos)
+11. 🎂 Tortas (4 productos)
+12. 📦 Otros (4 productos)
+
+## 🔐 ADMIN
+- URL: /admin (o #admin)
+- Password: admin123
+
+## 🚀 COMANDOS
+npm install
+npm run dev
+npm run build
+firebase deploy
+
+## 📋 FIREBASE RULES
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+
+## 🎨 COLORES
+- Rosa grisáceo: #a87880
+- Celeste grisáceo: #5a949f
+
+## 📱 PWA
+- Icono dinámico desde Firebase
+- Installable en iOS y Android
+- Offline enabled
+
+## ⚙️ FUNCIONALIDADES
+✅ Menú con 12 categorías
+✅ Productos con imagen (subir desde admin)
+✅ Sistema de reservas (formulario + admin gestiona)
+✅ Banner editable desde admin
+✅ Sección "Nosotros" editable
+✅ Footer con redes sociales editable
+✅ Panel admin completo
+✅ Logo dinámico para PWA
+✅ Firebase en tiempo real
+
+
+
+
+
+Archivos del proyecto actual:
+text
+
+src/
+├── App.tsx              # App principal (todo integrado)
+├── main.tsx             # Entry point
+├── index.css            # Estilos + Fuentes Poppins + Playfair Display
+├── data/
+│   └── defaultData.ts   # 12 categorías, 52 productos
+├── hooks/
+│   └── useLocalData.ts  # Firebase + localStorage
+└── types/
+    └── index.ts         # Tipos TypeScript
