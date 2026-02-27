@@ -1,0 +1,244 @@
+PROMPT PARA NUEVO CHAT (PÉGALO COMPLETO)
+Actúa como Desarrollador Senior Full Stack experto en React + Vite + TypeScript + Tailwind CSS + Firebase.
+
+Estoy trabajando en el proyecto:
+
+Dulsan Pastelería y Panadería
+Repositorio (ya descargado):
+https://github.com/alphaweb2008/DULSAN-PANADERIA-Y-PATELERIA/tree/main/DULSAN%20PANADERIA%20Y%20PASTELERIA
+
+Quiero que mantengas exactamente el comportamiento y diseño actual de la app y, a partir de ahí, hagas cambios sin romper nada.
+
+1. Stack y configuración (NO CAMBIAR, solo usar)
+Frontend: React + Vite + TypeScript
+Estilos: Tailwind CSS
+Estado / datos: Hook personalizado useLocalData (localStorage + Firebase)
+Backend: Firebase Firestore
+PWA: manifest + service worker
+Fuentes:
+Poppins → textos
+Playfair Display → títulos y slogan
+Firebase actual (usar estas APIs)
+TypeScript
+
+// src/firebase/config.ts
+const firebaseConfig = {
+  apiKey: "AIzaSyAyx-qrA8qKNofTgZy-WoO7sUtRl6Uen44",
+  authDomain: "dulsan-panaderia-y-pasteleria.firebaseapp.com",
+  projectId: "dulsan-panaderia-y-pasteleria",
+  storageBucket: "dulsan-panaderia-y-pasteleria.firebasestorage.app",
+  messagingSenderId: "867748902765",
+  appId: "1:867748902765:web:68404c6149d2897a930c64"
+};
+Reglas Firestore (modo desarrollo)
+JavaScript
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+2. Firestore (estructura que ya está funcionando)
+Colección config
+config/business
+name → “Dulsan Pastelería y Panadería by Sandy Pérez”
+slogan → texto editable desde Admin (por defecto "Somos el toque dulce para tu vida", pero el admin puede poner, por ejemplo, "El toque dulce para tu vida")
+phone, address, schedule
+(ejemplo:)
+text
+
+Lunes a Sábado:
+8 am - 12 pm
+15 pm - 19 pm
+Domingo: CERRADO
+adminPassword → por defecto admin123
+config/images
+logoUrl → logo principal (base64) subido desde Admin
+heroImage → imagen de encabezado (puede ser URL o base64)
+aboutUsImage → imagen para sección “Nosotros”
+config/about
+title, text
+config/social
+facebook, instagram, whatsapp, tiktok, mapsUrl
+Colección categories
+Categorías del menú (Desayunos, Para recargar energía, Zona saludable, Para los más golosos, Cafés fríos/calientes, Tortas, Bebidas adicionales, Otros, etc.).
+Colección menuItems
+Productos del menú:
+{ name, price (NÚMERO, sin $), category, image, description, available }
+Colección reservations
+Reservas: { name, phone, date, time, people, notes, status }.
+3. Archivos clave (YA EXISTEN)
+src/App.tsx → estructura principal (header, loading, menú, admin).
+src/hooks/useLocalData.ts → carga desde localStorage primero y luego sincroniza en segundo plano con Firestore (listeners).
+src/data/defaultData.ts → datos por defecto (productos, categorías, imágenes).
+defaultImages.logoUrl = '/dulsan-logo.png'
+defaultImages.heroImage = '/dulsan-header.png'
+src/components/LoadingScreen.tsx → pantalla de carga con bolitas rosadas.
+public/dulsan-logo.png → logo base de Dulsan (fallback).
+public/dulsan-header.png → encabezado base de Dulsan (fallback).
+(Opcional) public/dulsan-about.png → imagen “Nosotros”.
+Mantén esta estructura y solo modifica lo que yo pida.
+
+4. Diseño actual QUE DEBES RESPETAR
+4.1 Colores de marca
+Rosa principal: #D14D72 (botones, títulos, detalles).
+Rosa pastel fondo: #FFE3ED (fondo general y header).
+Blanco para tarjetas y fondos internos.
+4.2 Encabezado (HEADER)
+Fondo: #FFE3ED.
+En el centro:
+Imagen de encabezado:
+
+React
+
+<img
+  src={images.heroImage || '/dulsan-header.png'}
+  alt="Dulsan Pastelería y Panadería by Sandy Pérez"
+  className="w-full h-auto max-h-[260px] md:max-h-[360px] object-contain object-center"
+/>
+Si config/images.heroImage (Firestore) tiene valor → usar esa imagen.
+Si no tiene valor → usar /dulsan-header.png (archivo local en public).
+Debajo, solo una vez, el slogan:
+
+React
+
+<p className="text-2xl md:text-3xl font-playfair font-bold text-[#D14D72] tracking-wide">
+  {config.slogan || 'Somos el toque dulce para tu vida'}
+</p>
+IMPORTANTE:
+El slogan usa exactamente la MISMA tipografía y estilo que el título “Nuestro Menú”:
+font-playfair
+font-bold
+mismo color (#D14D72)
+tamaño equivalente (text-2xl md:text-3xl)
+Ya NO va en cursiva; ahora es un título fuerte, igual que “Nuestro Menú”.
+En el header NO debe aparecer texto duplicado tipo:
+“Dulsan Pastelería y Panadería by Sandy Pérez
+Somos el toque dulce para tu vida”
+dos veces.
+Solo la imagen + el slogan una vez.
+
+4.3 Logo
+images.logoUrl (base64) desde config/images.logoUrl (Firestore).
+Fallback: /dulsan-logo.png en public.
+Se usa:
+En el login de Admin.
+En la PWA (icono).
+En LoadingScreen (si está disponible).
+5. Pantalla de carga (LoadingScreen)
+Componente LoadingScreen:
+
+Fondo: #FFE3ED.
+Arriba:
+Si hay images.logoUrl → mostrar ese logo.
+Si no → un círculo blanco con ícono 🧁.
+Centro:
+3 bolitas rosadas (#D14D72) con animate-bounce y delays (efecto secuencial).
+Abajo:
+Texto: "Cargando sabores..." en Playfair.
+Lógica en App.tsx:
+
+React
+
+const [isLoading, setIsLoading] = useState(true);
+
+useEffect(() => {
+  const timer = setTimeout(() => setIsLoading(false), 1200); // ~1.2s
+  return () => clearTimeout(timer);
+}, []);
+
+if (isLoading) {
+  return <LoadingScreen logoUrl={images.logoUrl} />;
+}
+Es solo estético (1.2s).
+No depende ya de isDataLoaded para no generar pantallas en blanco.
+6. Lógica de datos (useLocalData)
+Debe seguir este patrón:
+
+Inicialización:
+Leer de localStorage (si hay datos).
+Si no hay, usar defaultData (productos, categorías, imágenes de Dulsan).
+Listeners de Firestore:
+onSnapshot para:
+config/business
+config/images
+config/about
+config/social
+categories
+menuItems
+reservations
+Cada vez que llega un snapshot:
+Actualiza el estado (setConfig, setImages, setCategories, setMenuItems, etc.).
+Guarda nueva versión en localStorage.
+Objetivo:
+La app no debe depender de entrar al Admin para que aparezcan fotos o datos.
+Desde la primera carga, usando defaults + Firestore, el menú debe mostrar imágenes y productos.
+7. Menú principal (público)
+Tabs de categorías (Desayunos, Para recargar energía, Zona saludable, Para los más golosos, Bebidas frías/calientes, Cafés, Tortas, Bebidas adicionales, Otros, etc.).
+
+Cada tab filtra productos por category.
+
+Cada tarjeta de producto:
+
+React
+
+<img
+  src={product.image}
+  alt={product.name}
+  className="w-full h-52 object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+  loading="lazy"
+/>
+Sin lógica de hidden dependiente de onLoad.
+Basta con que product.image tenga una URL/base64 válida.
+Nombre, descripción y precio se muestran debajo.
+
+8. Footer
+Columna 1:
+config.name (nombre del negocio).
+config.slogan (mismo texto que en el header, pero más pequeño).
+Columna 2 (Contacto):
+Teléfono (config.phone).
+Dirección (config.address).
+Horario (config.schedule) con saltos de línea.
+Columna 3 (Redes):
+Enlaces a config/social.facebook, instagram, whatsapp, tiktok, mapsUrl.
+El horario solo va en el footer, no en el header.
+
+9. Panel Admin (mantener tal cual)
+Login admin:
+
+Usa logo desde images.logoUrl || '/dulsan-logo.png'.
+Pide contraseña adminPassword (config.business.adminPassword).
+Pestañas:
+
+Negocio (business).
+Imágenes (images).
+Productos (menuItems).
+Categorías (categories).
+Nosotros (about).
+Redes Sociales (social).
+Reservas (reservations).
+No simplificar ni borrar pestañas sin que yo lo pida.
+
+10. Al pedirme cambios a futuro…
+Cuando en el nuevo chat te pida cosas como:
+
+“Cambia X del header”
+“Ajusta las categorías”
+“Modifica cómo se ve el detalle de producto”
+etc.
+Hazlo:
+
+Manteniendo todo lo anterior.
+Sin romper:
+Encabezado (imagen + slogan tipografía de “Nuestro Menú”).
+Loading con bolitas.
+Integración Firebase (dulsan-panaderia-y-pasteleria).
+Menú con imágenes desde la primera carga.
+Respetando:
+Colores #D14D72 y #FFE3ED.
+Fuentes Poppins + Playfair.
+Con este contexto, quiero que trabajes sobre el repo indicado manteniendo el estado actual tal como se describe arriba, y a partir de ahí hagas los cambios que vaya pidiendo.
