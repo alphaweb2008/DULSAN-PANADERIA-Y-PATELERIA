@@ -1,0 +1,225 @@
+Actúa como Desarrollador Senior Full Stack experto en React + Vite + TypeScript + Tailwind CSS + Firebase.
+
+Estoy trabajando en el proyecto:
+
+Dulsan Pastelería y Panadería
+Repositorio:
+https://github.com/alphaweb2008/DULSAN-PANADERIA-Y-PATELERIA/tree/main/DULSAN%20PANADERIA%20Y%20PASTELERIA
+
+Ya tengo el código descargado y quiero que mantengas exactamente el comportamiento actual de la app y, a partir de ahí, hagas cambios sin romper nada.
+
+1. Stack y configuración (NO CAMBIAR, solo usar)
+Frontend: React + Vite + TypeScript
+Estilos: Tailwind CSS
+Estado / datos: Hook personalizado useLocalData (localStorage + Firebase)
+Backend: Firebase Firestore
+PWA: manifest + service worker
+Fuentes:
+Poppins → textos
+Playfair Display → títulos / slogan
+Firebase actual (usar estas APIs, no las anteriores)
+TypeScript
+
+// Configuración actual
+const firebaseConfig = {
+  apiKey: "AIzaSyAyx-qrA8qKNofTgZy-WoO7sUtRl6Uen44",
+  authDomain: "dulsan-panaderia-y-pasteleria.firebaseapp.com",
+  projectId: "dulsan-panaderia-y-pasteleria",
+  storageBucket: "dulsan-panaderia-y-pasteleria.firebasestorage.app",
+  messagingSenderId: "867748902765",
+  appId: "1:867748902765:web:68404c6149d2897a930c64"
+};
+Usa este proyecto de Firebase, no el antiguo.
+
+Reglas Firestore (modo desarrollo)
+JavaScript
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+2. Estructura de Firestore (mantener)
+Colección config
+config/business
+name → “Dulsan Pastelería y Panadería by Sandy Pérez”
+slogan → por defecto "Somos el toque dulce para tu vida"
+phone, address, schedule
+(ejemplo de horario:)
+text
+
+Lunes a Sábado:
+8 am - 12 pm
+15 pm - 19 pm
+Domingo: CERRADO
+adminPassword → por defecto admin123
+config/images
+logoUrl → logo principal (base64) subido desde Admin
+heroImage → imagen de encabezado (logo grande de Dulsan; puede ser URL tipo Drive o base64)
+aboutUsImage → imagen sección “Nosotros”
+config/about
+title, text
+config/social
+facebook, instagram, whatsapp, tiktok, mapsUrl
+Colección categories
+Categorías del menú (Desayunos, Para recargar energía, Zona Saludable, Para los más golosos, Cafés, Tortas, Bebidas adicionales, Otros, etc.).
+Colección menuItems
+Cada producto:
+{ name, price (NÚMERO), category, image, description, available }
+image puede ser:
+base64 (data:image/...) o
+URL (https://...)
+Colección reservations
+Reservas hechas desde el formulario de la app:
+{ name, phone, date, time, people, notes, status }.
+3. Archivos importantes (ya existentes)
+src/App.tsx → estructura principal de la app (header, loading, menú, admin).
+src/hooks/useLocalData.ts → carga desde localStorage primero y luego sincroniza en segundo plano con Firestore (listeners en tiempo real).
+src/data/defaultData.ts → datos por defecto (productos, categorías, imágenes).
+src/components/LoadingScreen.tsx → pantalla de carga con bolitas rosadas.
+public/dulsan-logo.png → logo fijo Dulsan (fallback).
+public/dulsan-header.png → encabezado fijo Dulsan (fallback).
+Mantén esta arquitectura y solo cambia lo que yo pida.
+
+4. Comportamiento actual que DEBES RESPETAR
+4.1 Header (encabezado)
+Fondo: rosa pastel #FFE3ED.
+En el centro:
+Imagen del encabezado:
+src={images.heroImage || '/dulsan-header.png'}
+Es decir:
+Si config/images.heroImage en Firestore tiene valor → usar ESA imagen.
+Si está vacío → usar /dulsan-header.png desde public.
+Debajo, SOLO el slogan grande (no repetir el nombre):
+Texto: config.slogan || 'Somos el toque dulce para tu vida'
+Estilo:
+Fuente: Playfair Display
+Itálica
+Tamaño grande (text-2xl md:text-3xl o similar)
+Color: #b3536f
+Con ligera sombra (drop-shadow-sm)
+En el header ya NO debe aparecer dos veces
+“Dulsan Pastelería y Panadería by Sandy Pérez”.
+Solo la imagen y el slogan.
+
+4.2 Logo
+images.logoUrl (base64) viene de Firestore (config/images.logoUrl) y se usa:
+En el login de Admin.
+Para PWA/icono.
+En la pantalla de carga como logo.
+Fallback: si no hay logoUrl:
+Usar /dulsan-logo.png desde public.
+Nunca volver a un logo “genérico” distinto de Dulsan.
+4.3 Pantalla de carga (Loading)
+Componente LoadingScreen:
+
+Fondo: #FFE3ED.
+Arriba: logo Dulsan (de images.logoUrl o cupcake si no).
+Centro: 3 bolitas rosadas (#D14D72) con animate-bounce desfasadas.
+Abajo: texto "Cargando sabores..." en Playfair itálica.
+Lógica en App.tsx:
+
+const [isLoading, setIsLoading] = useState(true);
+useEffect simple:
+setTimeout(() => setIsLoading(false), ~1200ms);
+Mientras isLoading === true:
+return <LoadingScreen logoUrl={images.logoUrl} />;
+Después muestra la app normal.
+No depender de isDataLoaded para no dejar pantalla en blanco.
+
+5. Lógica de datos (useLocalData)
+useLocalData debe:
+
+Inicializar estado con:
+localStorage (si hay datos guardados).
+Si no, usar defaults (defaultData.ts).
+Conectar listeners de Firestore en segundo plano:
+config/business
+config/images
+config/about
+config/social
+categories
+menuItems
+reservations
+Actualizar estado en tiempo real y persistir en localStorage.
+No bloquear la UI: la app debe poder mostrar algo aunque Firebase tarde, y nunca volver a dejar el menú sin imágenes si ya están en Firestore.
+IMPORTANTE:
+
+menuItems debe traer image y pintarse sin lógicas de hidden que dependan de onLoad().
+La tarjeta de producto debe mostrar siempre:
+React
+
+<img
+  src={product.image}
+  alt={product.name}
+  className="w-full h-52 object-contain p-4 ..."
+  loading="lazy"
+/>
+6. Panel Admin (mantener estructura)
+Ruta de Admin:
+
+Pantalla de login admin:
+Muestra logo desde images.logoUrl || '/dulsan-logo.png'.
+Pide contraseña adminPassword (por defecto admin123).
+Pestañas:
+
+Negocio:
+name, slogan, phone, address, schedule, adminPassword.
+Imágenes:
+Logo Principal → guarda en config/images.logoUrl (base64).
+Imagen de encabezado → config/images.heroImage.
+Imagen “Nosotros” → config/images.aboutUsImage.
+Productos:
+CRUD sobre menuItems.
+Validar que price sea número sin $.
+Categoría obligatoria seleccionada de categories.
+Categorías:
+CRUD sobre categories.
+Nosotros:
+title, text en config/about.
+Redes:
+Campos en config/social.
+Reservas:
+Lista desde reservations.
+Botones para confirmar/eliminar.
+No eliminar ni simplificar estas secciones sin que yo lo pida explícitamente.
+
+7. Menú principal (público)
+Fila de pestañas de categorías (Desayunos, Para recargar energía, Zona Saludable, Para los más golosos, Cafés fríos/calientes, Tortas, Bebidas adicionales, Otros, etc.).
+Cada categoría muestra sus menuItems filtrados.
+Cada tarjeta de producto:
+Foto arriba (ver punto de imágenes).
+Nombre.
+Descripción.
+Precio (con $ renderizado, pero valor numérico interno).
+Buscador “Buscar antojitos…” que filtra productos visibles.
+Las imágenes del menú DEBEN cargar desde la primera vez sin necesidad de entrar al admin:
+
+Gracias a:
+Defaults (defaultData) si Firestore está vacío.
+O datos de Firestore si ya existen.
+8. Footer
+Nombre del negocio + slogan (una vez).
+Sección contacto:
+Teléfono.
+Dirección.
+Horario (config.schedule) con saltos de línea.
+Redes sociales:
+Facebook, Instagram, WhatsApp, TikTok, Maps.
+El horario solo va en el footer, no en el encabezado.
+
+9. Qué quiero que hagas a partir de este estado
+Cuando te pida cambios en el futuro:
+
+Trabaja sobre este comportamiento; no regreses a versiones anteriores.
+Antes de cambiar algo:
+Lee src/App.tsx, src/hooks/useLocalData.ts, src/data/defaultData.ts, src/components/LoadingScreen.tsx.
+No rompas:
+Header (imagen + slogan, sin duplicados).
+Pantalla de carga con bolitas.
+Integración con Firebase actual.
+Menú con imágenes desde la primera carga.
+Siempre mantén la estética rosa de Dulsan (colores #D14D72 y #FFE3ED) y las fuentes Poppins + Playfair.
